@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>First Timer Form</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fefefe;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, textarea, select {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1em;
+    }
+    button {
+      padding: 10px;
+      background: #4CAF50;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>First Timer Form</h2>
+  <form id="firstTimerForm">
+    <label>Title*</label>
+    <input type="text" name="title" required />
+
+    <label>Full Name*</label>
+    <input type="text" name="fullname" required />
+
+    <label>Phone Number*</label>
+    <input type="tel" name="phoneno" required />
+
+    <label>Other Phone Number</label>
+    <input type="tel" name="otherphonno" />
+
+    <label>Email</label>
+    <input type="email" name="email" />
+
+    <label>Address*</label>
+    <input type="text" name="address" required />
+
+    <label>Date of Visit*</label>
+    <input type="date" name="dateofvisit" required />
+
+    <label>Comment</label>
+    <textarea name="comment"></textarea>
+
+    <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const tenantId = "your-tenant-id"; // Replace dynamically in production
+
+    const form = document.getElementById("firstTimerForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const recaptchaResponse = grecaptcha.getResponse();
+      if (!recaptchaResponse) {
+        alert("Please complete the reCAPTCHA.");
+        return;
+      }
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data.tenantId = tenantId;
+      data.createdAt = new Date().toISOString();
+
+      try {
+        await db.collection("churches").doc(tenantId).collection("firsttimers").add(data);
+        window.location.href = "thank-you.html";
+      } catch (error) {
+        alert("Failed to save: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

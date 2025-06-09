@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Membership Form</title>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      text-transform: uppercase;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+<form id="membershipForm">
+  <h2>Membership Registration</h2>
+
+  <label for="title">Title*</label>
+  <input type="text" id="title" name="title" required />
+
+  <label for="fullname">Full Name*</label>
+  <input type="text" id="fullname" name="fullname" required />
+
+  <label for="agegroup">Age Group*</label>
+  <select id="agegroup" name="agegroup" required>
+    <option value="">SELECT</option>
+    <option value="0-5 TODDLER">0-5 TODDLER</option>
+    <option value="6-12 CHILDREN">6-12 CHILDREN</option>
+    <option value="13-17 TEENAGER">13-17 TEENAGER</option>
+    <option value="18-39 YOUTH">18-39 YOUTH</option>
+    <option value="40-49 YOUNG ADULT">40-49 YOUNG ADULT</option>
+    <option value="50-59 ADULT">50-59 ADULT</option>
+    <option value="60+ ELDERS">60+ ELDERS</option>
+  </select>
+
+  <label for="whatsappno">WhatsApp Number</label>
+  <input type="text" id="whatsappno" name="whatsappno" />
+
+  <label for="phoneno">Phone Number*</label>
+  <input type="text" id="phoneno" name="phoneno" required />
+
+  <label for="maritalstatus">Marital Status</label>
+  <select id="maritalstatus" name="maritalstatus">
+    <option value="">SELECT</option>
+    <option value="SINGLE">SINGLE</option>
+    <option value="MARRIED">MARRIED</option>
+    <option value="DIVORCED">DIVORCED</option>
+    <option value="WIDOWED">WIDOWED</option>
+  </select>
+
+  <label for="email">Email</label>
+  <input type="email" id="email" name="email" />
+
+  <label for="address">Address*</label>
+  <textarea id="address" name="address" rows="2" required></textarea>
+
+  <label for="dateofbirth">Date of Birth</label>
+  <input type="date" id="dateofbirth" name="dateofbirth" />
+
+  <label for="datejoined">Date Joined</label>
+  <input type="date" id="datejoined" name="datejoined" />
+
+  <label for="department">Department</label>
+  <select id="department" name="department">
+    <option value="">SELECT</option>
+    <option value="CHOIR">CHOIR</option>
+    <option value="USHERING">USHERING</option>
+    <option value="MEDIA">MEDIA</option>
+    <option value="PRAYER">PRAYER</option>
+    <option value="EVANGELISM">EVANGELISM</option>
+    <option value="TECHNICAL">TECHNICAL</option>
+    <option value="CHILDREN">CHILDREN</option>
+    <option value="TEENS">TEENS</option>
+    <option value="YOUTH">YOUTH</option>
+  </select>
+
+  <label for="designation">Designation*</label>
+  <select id="designation" name="designation" required>
+    <option value="">SELECT</option>
+    <option value="MEMBERS ONLY">MEMBERS ONLY</option>
+    <option value="WORKER">WORKER</option>
+    <option value="MINISTER">MINISTER</option>
+    <option value="ORDAINED MINISTER">ORDAINED MINISTER</option>
+  </select>
+
+  <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
+
+  <button type="submit">Submit</button>
+</form>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MSG_ID",
+    appId: "YOUR_APP_ID",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const tenantId = "REPLACE_WITH_CHURCH_TENANT_ID";
+
+  document.getElementById("membershipForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const token = grecaptcha.getResponse();
+    if (!token) {
+      alert("Please complete the reCAPTCHA.");
+      return;
+    }
+
+    const form = e.target;
+    const data = {
+      tenantId,
+      title: form.title.value,
+      fullname: form.fullname.value,
+      agegroup: form.agegroup.value,
+      whatsappno: form.whatsappno.value,
+      phoneno: form.phoneno.value,
+      maritalstatus: form.maritalstatus.value,
+      email: form.email.value,
+      address: form.address.value,
+      dateofbirth: form.dateofbirth.value,
+      datejoined: form.datejoined.value,
+      department: form.department.value,
+      designation: form.designation.value,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      await addDoc(collection(db, `churches/${tenantId}/members`), data);
+      window.location.href = "thankyou.html";
+    } catch (error) {
+      alert("Error submitting form: " + error.message);
+    }
+  });
+</script>
+
+</body>
+</html>

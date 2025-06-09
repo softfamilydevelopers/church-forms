@@ -72,32 +72,36 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  const db = firebase.firestore();
 
-    const tenantId = "qd1sTVSeGIbIBp6st5cDzpQQlI83"; // Replace dynamically in production
+  const tenantId = "qd1sTVSeGIbIBp6st5cDzpQQlI83"; // Replace dynamically in production
 
-    const form = document.getElementById("firstTimerForm");
+  const form = document.getElementById("firstTimerForm");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const recaptchaResponse = grecaptcha.getResponse();
-      if (!recaptchaResponse) {
-        alert("Please complete the reCAPTCHA.");
-        return;
-      }
+    const recaptchaResponse = grecaptcha.getResponse();
+    if (!recaptchaResponse) {
+      alert("Please complete the reCAPTCHA.");
+      return;
+    }
 
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      data.tenantId = tenantId;
-      data.createdAt = new Date().toISOString();
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-      try {
-        await db.collection("churches").doc(tenantId).collection("firsttimers").add(data);
-        window.location.href = "thank-you.html";
-      } catch (error) {
-        alert("Failed to save: " + error.message);
-      }
+    // ❌ Remove g-recaptcha-response before saving
+    delete data["g-recaptcha-response"];
+
+    data.tenantId = tenantId;
+    data.createdAt = new Date().toISOString();
+
+    try {
+      await db.collection("churches").doc(tenantId).collection("firsttimers").add(data);
+      window.location.href = "thank-you.html";
+    } catch (error) {
+      alert("Failed to save: " + error.message);
+    }
     });
   </script>
 </body>
